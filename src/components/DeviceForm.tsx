@@ -84,7 +84,7 @@ export default function DeviceForm({ existing }: { existing?: ExistingDevice }) 
             minLength={2}
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. OLT-Zimmerman-02"
+            placeholder="e.g. OLT Zimmerman-02"
             className={inputClass}
           />
         </Field>
@@ -105,7 +105,7 @@ export default function DeviceForm({ existing }: { existing?: ExistingDevice }) 
             required
             value={host}
             onChange={(e) => setHost(e.target.value)}
-            placeholder="e.g. 10.20.4.11 or ont-api.internal.konnect.co.ke"
+            placeholder="e.g. 10.20.4.11 or ont-api.internal.network.co.ke"
             className={inputClass + " font-mono"}
           />
         </Field>
@@ -136,7 +136,7 @@ export default function DeviceForm({ existing }: { existing?: ExistingDevice }) 
           <input
             value={clusterTag}
             onChange={(e) => setClusterTag(e.target.value)}
-            placeholder="e.g. Githurai-44-OLT2"
+            placeholder="e.g. Githurai 44 OLT2"
             className={inputClass}
           />
         </Field>

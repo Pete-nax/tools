@@ -1,39 +1,54 @@
+// update-emails.mjs
+// Updates all seeded konnect.co.ke email addresses in the DB to mail.com.
+// Run once from ~/noc:  node update-emails.mjs
 
-import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
+import pg from "pg";
+import * as fs from "fs";
 
-const db = new PrismaClient();
+// Load .env.local
+if (fs.existsSync(".env.local")) {
+  for (const line of fs.readFileSync(".env.local", "utf8").split("\n")) {
+    const [key, ...rest] = line.split("=");
+    if (key && rest.length) process.env[key.trim()] = rest.join("=").trim().replace(/^"|"$/g, "");
+  }
+}
+
+const db = new pg.Client({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
+});
+
+const updates = [
+  ["admin@konnect.co.ke",        "admin@mail.com"],
+  ["brian.otieno@konnect.co.ke", "brian.otieno@mail.com"],
+  ["faith.mwangi@konnect.co.ke", "faith.mwangi@mail.com"],
+  ["viewer@konnect.co.ke",       "viewer@mail.com"],
+];
 
 async function main() {
-  console.log("Seeding demo data...");
+  await db.connect();
+  console.log("Connected.");
 
-  // ---------- Users ----------
-  const passwordHash = await bcrypt.hash("ChangeMe123!", 12);
+  for (const [oldEmail, newEmail] of updates) {
+    const res = await db.query(
+      `UPDATE "User" SET email=$1, "updatedAt"=now() WHERE email=$2`,
+      [newEmail, oldEmail]
+    );
+    if (res.rowCount > 0) {
+      console.log(`✓ ${oldEmail} → ${newEmail}`);
+    } else {
+      console.log(`- ${oldEmail} not found (already updated or never seeded)`);
+    }
+  }
 
-  const [admin, engineer1, engineer2, viewer] = await Promise.all([
-    db.user.upsert({
-      where: { email: "admin@konnect.co.ke" },
-      update: {},
-      create: { name: "Wanjiru Kamau", email: "admin@mail.com", passwordHash, role: "ADMIN" },
-    }),
-    db.user.upsert({
-      where: { email: "brian.otieno@konnect.co.ke" },
-      update: {},
-      create: { name: "Brian Otieno", email: "brian.otieno@mail.com", passwordHash, role: "ENGINEER" },
-    }),
-    db.user.upsert({
-      where: { email: "faith.mwangi@mail.konnect.co.ke" },
-      update: {},
-      create: { name: "Faith Mwangi", email: "faith.mwangi@mail.com", passwordHash, role: "ENGINEER" },
-    }),
-    db.user.upsert({
-      where: { email: "viewer@konnect.co.ke" },
-      update: {},
-      create: { name: "Peter Hinga", email: "viewer@mail.com", passwordHash, role: "VIEWER" },
-    }),
-  ]);
+  console.log("\nDone. New login emails:");
+  updates.forEach(([, e]) => console.log(" ", e));
+  console.log("Password unchanged: ChangeMe123!");
+}
 
-  console.log(`Users ready. Default password for all seeded accounts: ChangeMe123!`);
+main()
+  .catch((e) => { console.error(e); process.exit(1); })
+  .finally(() => db.end());
 
   // ---------- Devices ----------
   const deviceDefs = [

@@ -16,8 +16,8 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Konnect NOC | Technical Support Workspace",
-  description: "Ticketing, knowledge base, device registry and live diagnostics for the Konnect support team.",
+  title: " Technical Support Workspace",
+  description: "Ticketing, knowledge base, device registry and live diagnostics for the network support team.",
   robots: { index: false, follow: false },
 };
 

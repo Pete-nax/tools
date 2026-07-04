@@ -54,72 +54,35 @@ export default async function DashboardPage() {
     .filter(([, v]) => v.count > 1)
     .sort((a, b) => b[1].count - a[1].count);
 
-  return (
+return (
     <div className="space-y-8">
       <div>
         <h1 className="text-xl font-semibold text-ink">Shift overview</h1>
         <p className="text-sm text-ink-muted mt-1">Live state of the network and the queue.</p>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          icon={<TicketIcon size={18} />}
-          label="Open tickets"
-          value={openCount}
-          href="/tickets"
-          tone="info"
-        />
-        <StatCard
-          icon={<AlertTriangle size={18} />}
-          label="Critical priority"
-          value={criticalCount}
-          href="/tickets?priority=CRITICAL"
-          tone="down"
-        />
-        <StatCard
-          icon={<CircleCheck size={18} />}
-          label="Devices up"
-          value={`${devicesUp} / ${deviceTotal}`}
-          href="/devices"
-          tone="up"
-        />
-        <StatCard
-          icon={<CircleX size={18} />}
-          label="Active incidents"
-          value={activeIncidents.length}
-          href="/diagnostics"
-          tone={activeIncidents.length > 0 ? "down" : "up"}
-        />
+      {/* Quick nav — visible on all screen sizes, prominent on mobile */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        {[
+          { href: "/tickets",     label: "Tickets",     icon: "🎟️", desc: "Support queue" },
+          { href: "/kb",          label: "Knowledge",   icon: "📖", desc: "Articles & guides" },
+          { href: "/devices",     label: "Devices",     icon: "🖥️",  desc: "Inventory" },
+          { href: "/diagnostics", label: "Diagnostics", icon: "👨🏻‍🔧", desc: "Health checks" },
+          { href: "/devices/new", label: "Add device",  icon: "＋",  desc: "Register new" },
+        ].map(({ href, label, icon, desc }) => (
+          <Link
+            key={href}
+            href={href}
+            className="bg-base-panel border border-base-border rounded-xl p-4 flex flex-col gap-2 hover:border-status-info/40 hover:bg-base-panel2 transition-colors"
+          >
+            <span className="text-2xl">{icon}</span>
+            <div>
+              <div className="text-sm font-medium text-ink">{label}</div>
+              <div className="text-xs text-ink-faint mt-0.5">{desc}</div>
+            </div>
+          </Link>
+        ))}
       </div>
-
-      {correlationAlerts.length > 0 && (
-        <div className="bg-status-warn/10 border border-status-warn/30 rounded-2xl p-5">
-          <h2 className="text-sm font-semibold text-status-warn flex items-center gap-2 mb-3">
-            <AlertTriangle size={16} /> Correlation alert: shared cluster tags
-          </h2>
-          <p className="text-xs text-ink-muted mb-3">
-            Multiple open tickets share the same cluster tag. Treat these as one investigation, not
-            separate faults.
-          </p>
-          <div className="space-y-2">
-            {correlationAlerts.map(([tag, data]) => (
-              <div key={tag} className="flex items-center justify-between bg-base-panel rounded-lg px-3.5 py-2.5 border border-base-border">
-                <div>
-                  <span className="font-mono text-sm text-ink">{tag}</span>
-                  <span className="text-xs text-ink-muted ml-2">{data.count} open tickets</span>
-                </div>
-                <div className="flex gap-1.5">
-                  {data.tickets.slice(0, 4).map((t) => (
-                    <Link
-                      key={t.id}
-                      href={`/tickets/${t.id}`}
-                      className="text-xs font-mono text-status-info hover:underline"
-                      title={t.title}
-                    >
-                      #{t.id.slice(-5)}
-                    </Link>
-                  ))}
-                </div>
               </div>
             ))}
           </div>

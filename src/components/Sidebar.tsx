@@ -25,7 +25,7 @@ export default function Sidebar() {
     <aside className="hidden md:flex md:w-60 md:flex-col shrink-0 border-r border-base-border bg-base-panel">
       <div className="h-16 flex items-center gap-2 px-5 border-b border-base-border">
         <span className="h-2.5 w-2.5 rounded-full bg-status-up animate-pulse-soft" />
-        <span className="font-mono text-sm tracking-wide text-ink font-medium">KONNECT NOC</span>
+        <span className="font-mono text-sm tracking-wide text-ink font-medium">Diagnosis tool</span>
       </div>
       <nav className="flex-1 py-4 px-3 space-y-1">
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {

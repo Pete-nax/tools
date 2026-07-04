@@ -31,20 +31,20 @@ export default async function LoginPage({
       <div className="login-panel w-full max-w-sm relative">
        <div className="login-eyebrow mb-8 text-center">
           <div className="inline-flex items-center gap-2 mb-4">
-            <span className="h-2.5 w-2.5 rounded-full bg-status-up animate-pulse-soft" />
+            <span className="login-status-dot h-2.5 w-2.5 rounded-full bg-status-up" />
             <span className="text-xs uppercase tracking-[0.2em] text-ink-muted font-mono">
               NOC tool
             </span>
           </div>
-          <h1 className="text-2xl font-semibold text-ink">Technical Support Workspace</h1>
-          <p className="text-sm text-ink-muted mt-1.5">Sign in to your shift</p>
+          <h1 className="login-heading text-2xl font-semibold text-ink">Technical Support Workspace</h1>
+          <p className="login-subtext text-sm text-ink-muted mt-1.5">Sign in to your shift</p>
         </div>
 
-        <div className="bg-base-panel border border-base-border rounded-2xl p-7 shadow-panel">
+        <div className="login-panel-card bg-base-panel border border-base-border rounded-2xl p-7 shadow-panel">
           <LoginForm nextPath={nextPath} />
         </div>
 
-        <p className="text-center text-xs text-ink-faint mt-6 font-mono">
+        <p className="login-footnote text-center text-xs text-ink-faint mt-6 font-mono">
           Tickets · Knowledge base · Device diagnostics
         </p>
       </div>

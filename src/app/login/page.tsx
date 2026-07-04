@@ -1,4 +1,5 @@
 import LoginForm from "@/components/LoginForm";
+import "../../login.css";
 
 export default async function LoginPage({
   searchParams,

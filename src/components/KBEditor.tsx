@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2, GripVertical } from "lucide-react";
+import "../ui.css";
 
 type Block = { type: "heading" | "text" | "checklist" | "code"; text: string };
 

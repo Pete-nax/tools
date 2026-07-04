@@ -47,7 +47,7 @@ export default function Sidebar() {
         })}
       </nav>
       <div className="px-5 py-4 border-t border-base-border text-xs text-ink-faint font-mono">
-        Konnect NOC · v1.0
+        Net Diagnosis tool
       </div>
     </aside>
   );

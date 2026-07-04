@@ -31,7 +31,7 @@ export default async function LoginPage({
           <div className="inline-flex items-center gap-2 mb-4">
             <span className="h-2.5 w-2.5 rounded-full bg-status-up animate-pulse-soft" />
             <span className="text-xs uppercase tracking-[0.2em] text-ink-muted font-mono">
-              Konnect NOC
+              NOC tool
             </span>
           </div>
           <h1 className="text-2xl font-semibold text-ink">Technical Support Workspace</h1>

@@ -48,7 +48,7 @@ export default function LoginForm({ nextPath }: { nextPath: string }) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className="w-full rounded-lg border border-base-border bg-base-bg px-3.5 py-2.5 text-ink placeholder:text-ink-faint focus:border-status-info transition-colors"
-          placeholder="you@konnect.co.ke"
+          placeholder="your@mail.com"
         />
       </div>
       <div>

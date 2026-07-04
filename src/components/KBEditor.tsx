@@ -128,7 +128,7 @@ export default function KBEditor({ existing }: { existing?: ExistingArticle }) {
                 <select
                   value={block.type}
                   onChange={(e) => updateBlock(i, { type: e.target.value as Block["type"] })}
-                  className="text-xs bg-base-bg border border-base-border rounded px-2 py-1 text-ink-muted"
+                  className="kb-block-type bg-base-bg border border-base-border rounded px-2 py-1"
                 >
                   <option value="heading">Heading</option>
                   <option value="text">Text</option>
@@ -139,7 +139,7 @@ export default function KBEditor({ existing }: { existing?: ExistingArticle }) {
               <button
                 type="button"
                 onClick={() => removeBlock(i)}
-                className="text-ink-faint hover:text-status-down transition-colors opacity-0 group-hover:opacity-100"
+                className="kb-block-action text-ink-faint hover:text-status-down transition-colors"
               >
                 <Trash2 size={14} />
               </button>

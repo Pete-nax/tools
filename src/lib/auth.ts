@@ -3,7 +3,7 @@ import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 
-export const SESSION_COOKIE = "konnect_session";
+export const SESSION_COOKIE = "network_session";
 const SESSION_TTL_SECONDS = 8 * 60 * 60; // 8 hours, matches a NOC shift
 
 export type SessionPayload = {

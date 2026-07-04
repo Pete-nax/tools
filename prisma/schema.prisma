@@ -1,0 +1,211 @@
+// Konnect NOC - Technical Support Workspace
+// Prisma schema. Run `npx prisma generate` after install and
+// `npx prisma migrate deploy` (or `migrate dev` locally) before first use.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  ENGINEER
+  VIEWER
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  ESCALATED
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum TicketCategory {
+  ONT_CPE
+  PON_OPTICAL
+  VLAN
+  DHCP_PPPOE
+  WIFI_LAN
+  BACKEND_API
+  CORE_UPLINK
+  OTHER
+}
+
+enum DeviceType {
+  ONT
+  OLT
+  ROUTER
+  SWITCH
+  SERVER
+  ACCESS_POINT
+  OTHER
+}
+
+enum CheckType {
+  TCP
+  HTTP
+  HTTPS
+  DNS
+}
+
+enum IncidentSeverity {
+  MINOR
+  MAJOR
+  CRITICAL
+}
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         Role      @default(ENGINEER)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  assignedTickets Ticket[]        @relation("AssignedTickets")
+  reportedTickets Ticket[]        @relation("ReportedTickets")
+  comments        TicketComment[]
+  kbArticles      KBArticle[]
+  auditLogs       AuditLog[]
+
+  @@index([email])
+}
+
+model Ticket {
+  id           String         @id @default(cuid())
+  title        String
+  description  String
+  status       TicketStatus   @default(OPEN)
+  priority     TicketPriority @default(MEDIUM)
+  category     TicketCategory @default(OTHER)
+  clusterTag   String?
+  reporterName String?
+  reporterContact String?
+
+  deviceId   String?
+  device     Device? @relation(fields: [deviceId], references: [id])
+
+  assigneeId String?
+  assignee   User?   @relation("AssignedTickets", fields: [assigneeId], references: [id])
+
+  reporterId String?
+  reporter   User?   @relation("ReportedTickets", fields: [reporterId], references: [id])
+
+  incidents  Incident[]
+  comments   TicketComment[]
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  resolvedAt DateTime?
+
+  @@index([status])
+  @@index([clusterTag])
+  @@index([priority])
+}
+
+model TicketComment {
+  id        String   @id @default(cuid())
+  ticketId  String
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  body      String
+  createdAt DateTime @default(now())
+
+  @@index([ticketId])
+}
+
+model KBArticle {
+  id        String   @id @default(cuid())
+  title     String
+  category  String
+  tags      String[]
+  // Notion-style block content: [{ "type": "heading|text|checklist|code", "text": "..." }, ...]
+  content   Json
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+}
+
+model Device {
+  id                   String     @id @default(cuid())
+  name                 String
+  type                 DeviceType @default(OTHER)
+  host                 String
+  port                 Int?
+  checkType            CheckType  @default(TCP)
+  clusterTag           String?
+  ownerTeam            String?
+  expectedUptimeTarget Float      @default(99.9)
+  failureThreshold     Int        @default(3)
+  isActive             Boolean    @default(true)
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+
+  checks    DiagnosticCheck[]
+  incidents Incident[]
+  tickets   Ticket[]
+
+  @@index([clusterTag])
+}
+
+model DiagnosticCheck {
+  id            String   @id @default(cuid())
+  deviceId      String
+  device        Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  success       Boolean
+  latencyMs     Int?
+  statusCode    Int?
+  errorMessage  String?
+  timestamp     DateTime @default(now())
+
+  @@index([deviceId, timestamp])
+}
+
+model Incident {
+  id                  String           @id @default(cuid())
+  deviceId            String
+  device              Device           @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  severity            IncidentSeverity @default(MAJOR)
+  consecutiveFailures Int              @default(0)
+  startedAt           DateTime         @default(now())
+  resolvedAt          DateTime?
+  notes                String?
+
+  ticketId String?
+  ticket   Ticket? @relation(fields: [ticketId], references: [id])
+
+  @@index([deviceId, resolvedAt])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+  action     String
+  targetType String
+  targetId   String?
+  metadata   Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([targetType, targetId])
+}

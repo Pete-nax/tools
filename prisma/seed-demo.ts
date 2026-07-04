@@ -14,22 +14,22 @@ async function main() {
     db.user.upsert({
       where: { email: "admin@konnect.co.ke" },
       update: {},
-      create: { name: "Wanjiru Kamau", email: "admin@konnect.co.ke", passwordHash, role: "ADMIN" },
+      create: { name: "Wanjiru Kamau", email: "admin@mail.com", passwordHash, role: "ADMIN" },
     }),
     db.user.upsert({
       where: { email: "brian.otieno@konnect.co.ke" },
       update: {},
-      create: { name: "Brian Otieno", email: "brian.otieno@konnect.co.ke", passwordHash, role: "ENGINEER" },
+      create: { name: "Brian Otieno", email: "brian.otieno@mail.com", passwordHash, role: "ENGINEER" },
     }),
     db.user.upsert({
-      where: { email: "faith.mwangi@konnect.co.ke" },
+      where: { email: "faith.mwangi@mail.konnect.co.ke" },
       update: {},
-      create: { name: "Faith Mwangi", email: "faith.mwangi@konnect.co.ke", passwordHash, role: "ENGINEER" },
+      create: { name: "Faith Mwangi", email: "faith.mwangi@mail.com", passwordHash, role: "ENGINEER" },
     }),
     db.user.upsert({
       where: { email: "viewer@konnect.co.ke" },
       update: {},
-      create: { name: "Peter Hinga", email: "viewer@konnect.co.ke", passwordHash, role: "VIEWER" },
+      create: { name: "Peter Hinga", email: "viewer@mail.com", passwordHash, role: "VIEWER" },
     }),
   ]);
 

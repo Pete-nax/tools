@@ -10,7 +10,7 @@ function getSecretKey(): Uint8Array {
 }
 
 async function hasValidSession(req: NextRequest): Promise<boolean> {
-  const token = req.cookies.get("konnect_session")?.value;
+  const token = req.cookies.get("network_session")?.value;
   if (!token) return false;
   try {
     await jwtVerify(token, getSecretKey());

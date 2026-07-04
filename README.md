@@ -15,7 +15,7 @@ diagnostic engine with automatic incident detection.
   re-escalate the same problem.
 - **Device registry**: register any device with a routable address (ONT,
   OLT, router, switch, server, access point) and a check method.
-- **Diagnostics engine**: real network checks, not simulated data. A TCP
+- **Diagnostics engine**: network checks. A TCP
   check opens an actual socket. An HTTP/HTTPS check issues an actual
   request. A DNS check performs an actual lookup. Results are logged to
   history. N consecutive failures (configurable per device) automatically
@@ -43,8 +43,7 @@ the history will show real failures, not placeholder numbers.
 ### 1. Requirements
 
 - Node.js 20+
-- A PostgreSQL database reachable from wherever you run this (Neon,
-  Vercel Postgres, Supabase, or your own instance all work)
+- A PostgreSQL database reachable from wherever you run this (Neon,Vercel Postgres, Supabase, or your own instance all work)
 
 ### 2. Install
 
@@ -104,22 +103,6 @@ Visit `http://localhost:3000` and sign in with the account you just
 seeded.
 
 
-## Project structure
-
-```
-prisma/schema.prisma        Data model
-prisma/seed.ts               Creates the first admin account only
-src/middleware.ts            Route protection (session check)
-src/lib/                     Auth, RBAC, validation, diagnostics engine,
-                              monitor orchestration, audit log
-src/components/              Client side forms and interactive widgets
-src/app/(app)/                Authenticated pages (dashboard, tickets,
-                              kb, devices, diagnostics), behind one
-                              shared sidebar/topbar shell
-src/app/login/                Sign-in page
-src/app/api/                  Route handlers for all mutations and the
-                              cron endpoint
-```
 
 ## Roles
 

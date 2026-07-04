@@ -1,5 +1,5 @@
 import LoginForm from "@/components/LoginForm";
-import "../../login.css";
+import "@/login.css";
 
 export default async function LoginPage({
   searchParams,
@@ -10,7 +10,8 @@ export default async function LoginPage({
   const nextPath = params.next && params.next.startsWith("/") ? params.next : "/dashboard";
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-base-bg px-4 relative overflow-hidden">
+<main className="min-h-screen flex items-center justify-center bg-base-bg px-4 relative overflow-hidden">
+      <div className="login-bg" />
       {/* Signature element: a faint heartbeat trace behind the login panel,
           the same waveform used to represent device health across the app. */}
       <svg
@@ -27,8 +28,8 @@ export default async function LoginPage({
         />
       </svg>
 
-      <div className="w-full max-w-sm relative">
-        <div className="mb-8 text-center">
+      <div className="login-panel w-full max-w-sm relative">
+       <div className="login-eyebrow mb-8 text-center">
           <div className="inline-flex items-center gap-2 mb-4">
             <span className="h-2.5 w-2.5 rounded-full bg-status-up animate-pulse-soft" />
             <span className="text-xs uppercase tracking-[0.2em] text-ink-muted font-mono">

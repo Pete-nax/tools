@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2, GripVertical } from "lucide-react";
-import "../ui.css";
+import "@/ui.css";
 
 type Block = { type: "heading" | "text" | "checklist" | "code"; text: string };
 
@@ -118,14 +118,13 @@ export default function KBEditor({ existing }: { existing?: ExistingArticle }) {
           className={inputClass}
         />
       </label>
-
-      <div className="space-y-3">
+      <div className="kb-block-toolbar">
         <span className="block text-sm font-medium text-ink-muted">Content</span>
         {blocks.map((block, i) => (
-          <div key={i} className="bg-base-panel border border-base-border rounded-xl p-3.5 group">
+          <div key={i} className="kb-block p-3.5">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <GripVertical size={14} className="text-ink-faint" />
+                <GripVertical size={14} className="kb-drag-handle" />
                 <select
                   value={block.type}
                   onChange={(e) => updateBlock(i, { type: e.target.value as Block["type"] })}

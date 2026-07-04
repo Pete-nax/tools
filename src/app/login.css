@@ -1,0 +1,172 @@
+/*
+      Animated Login Page
+
+/* 1. Ambient background — slow, subtle, never distracting */
+.login-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.login-bg::before,
+.login-bg::after {
+  content: "";
+  position: absolute;
+  width: 55vw;
+  height: 55vw;
+  max-width: 640px;
+  max-height: 640px;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.16;
+  will-change: transform;
+  animation: drift 22s ease-in-out infinite alternate;
+}
+
+.login-bg::before {
+  background: radial-gradient(circle, #4C8DFF, transparent 70%);
+  top: -15%;
+  left: -10%;
+}
+
+.login-bg::after {
+  background: radial-gradient(circle, #2FBF8F, transparent 70%);
+  bottom: -20%;
+  right: -10%;
+  animation-delay: -11s;
+  animation-direction: alternate-reverse;
+}
+
+@keyframes drift {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  100% { transform: translate3d(4%, 6%, 0) scale(1.08); }
+}
+
+/* 2. Panel entrance — one clean staggered reveal, not a bounce-fest */
+.login-panel {
+  animation: panel-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.login-eyebrow   { animation: field-in 0.45s ease-out both; animation-delay: 0.05s; }
+.login-heading   { animation: field-in 0.45s ease-out both; animation-delay: 0.1s; }
+.login-subtext   { animation: field-in 0.45s ease-out both; animation-delay: 0.15s; }
+.login-panel-card{ animation: field-in 0.45s ease-out both; animation-delay: 0.2s; }
+.login-footnote  { animation: field-in 0.45s ease-out both; animation-delay: 0.3s; }
+
+@keyframes panel-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes field-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* 3. Live status pulse (pairs with your existing animate-pulse-soft dot) */
+.login-status-dot {
+  box-shadow: 0 0 0 0 rgba(47, 191, 143, 0.6);
+  animation: status-ring 2.4s ease-out infinite;
+}
+
+@keyframes status-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(47, 191, 143, 0.45); }
+  70%  { box-shadow: 0 0 0 8px rgba(47, 191, 143, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(47, 191, 143, 0); }
+}
+
+/* 4. Inputs — animated focus underline instead of a jumpy border color */
+.login-field {
+  position: relative;
+}
+
+.login-field input {
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.login-field::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: #4C8DFF;
+  border-radius: 2px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s ease;
+}
+
+.login-field:focus-within::after {
+  transform: scaleX(1);
+}
+
+/* 5. Submit button — hover lift + inline loading state, no layout shift */
+.login-submit {
+  position: relative;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.login-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px -8px rgba(76, 141, 255, 0.55);
+}
+
+.login-submit:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.login-submit .spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: -2px;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* 6. Error banner — a single short shake, not a jitter loop */
+.login-error {
+  animation: shake 0.4s ease;
+}
+
+@keyframes shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-4px); }
+  40%, 60% { transform: translateX(4px); }
+}
+
+/* 7. Accessibility: honor OS motion preference and never trap focus feedback */
+@media (prefers-reduced-motion: reduce) {
+  .login-bg::before,
+  .login-bg::after,
+  .login-panel,
+  .login-eyebrow,
+  .login-heading,
+  .login-subtext,
+  .login-panel-card,
+  .login-footnote,
+  .login-status-dot,
+  .login-error {
+    animation: none !important;
+  }
+  .login-submit:hover:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* Keyboard users always get a visible ring even inside the animated card */
+.login-panel :focus-visible {
+  outline: 2px solid #4C8DFF;
+  outline-offset: 2px;
+}

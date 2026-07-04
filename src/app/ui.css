@@ -1,0 +1,254 @@
+/*
+  NOC -style Knowledge Base UI.
+*/
+
+/* 1. Block shell */
+.kb-block {
+  position: relative;
+  border: 1px solid #232A3B;
+  border-radius: 0.75rem;
+  background: #131826;
+  transition: border-color 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
+}
+
+.kb-block:hover,
+.kb-block:focus-within {
+  border-color: #2c3548;
+  background: #1A2033;
+}
+
+/* Enter/exit transitions for add/remove — pair with a "removing" class
+   toggled in React just before the item is spliced from state. */
+.kb-block {
+  animation: kb-block-in 0.2s ease both;
+}
+
+.kb-block.kb-block--removing {
+  animation: kb-block-out 0.15s ease forwards;
+}
+
+@keyframes kb-block-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes kb-block-out {
+  to { opacity: 0; transform: translateY(-4px) scale(0.98); }
+}
+
+/* 2. Block toolbar (type select + delete + drag handle) */
+.kb-block-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+/* Hidden until hover OR keyboard focus OR touch — never hover-only */
+.kb-block-action {
+  opacity: 0;
+  transition: opacity 0.12s ease, color 0.12s ease;
+}
+
+.kb-block:hover .kb-block-action,
+.kb-block:focus-within .kb-block-action,
+.kb-block-action:focus-visible {
+  opacity: 1;
+}
+
+/* Touch devices have no hover — always show controls so flow isn't hidden */
+@media (hover: none) {
+  .kb-block-action {
+    opacity: 1;
+  }
+}
+
+/* Real 44x44 hit target without inflating the visible icon */
+.kb-block-action {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.kb-block-action::before {
+  content: "";
+  position: absolute;
+  inset: -6px; /* pads a 32px visual box out to a 44px hit area */
+}
+
+.kb-block-action:focus-visible {
+  outline: 2px solid #4C8DFF;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* 3. Drag handle — draggable via mouse, but ALSO operable by keyboard.
+   Pair with role="button", tabIndex={0}, and onKeyDown handling
+   ArrowUp/ArrowDown to reorder in the component. */
+.kb-drag-handle {
+  cursor: grab;
+  color: #5B6478;
+  touch-action: none;
+}
+
+.kb-drag-handle:active {
+  cursor: grabbing;
+}
+
+.kb-drag-handle[aria-grabbed="true"] {
+  color: #4C8DFF;
+}
+
+/* 4. Block type badge — quick visual scan without reading a <select> */
+.kb-block-type {
+  font-family: var(--font-plex-mono, monospace);
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8891A6;
+  background: #0B0E14;
+  border: 1px solid #232A3B;
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+}
+
+/* 5. Slash-command / add-block menu */
+.kb-add-menu {
+  position: absolute;
+  z-index: 20;
+  min-width: 200px;
+  background: #131826;
+  border: 1px solid #232A3B;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 0 0 rgba(255,255,255,0.03) inset, 0 12px 32px -12px rgba(0,0,0,0.6);
+  padding: 0.375rem;
+  animation: kb-menu-in 0.12s ease both;
+}
+
+@keyframes kb-menu-in {
+  from { opacity: 0; transform: translateY(-4px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.kb-add-menu [role="option"] {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.625rem; /* comfortable 44px-tall row for touch */
+  border-radius: 0.5rem;
+  color: #E6E9F0;
+  cursor: pointer;
+}
+
+.kb-add-menu [role="option"][aria-selected="true"],
+.kb-add-menu [role="option"]:hover {
+  background: #1A2033;
+}
+
+.kb-add-menu [role="option"]:focus-visible {
+  outline: 2px solid #4C8DFF;
+  outline-offset: -2px;
+}
+
+/* 6. Inline editable text — caret-friendly, no focus flash on every keystroke */
+.kb-editable {
+  outline: none;
+  border-radius: 0.375rem;
+  transition: background-color 0.12s ease;
+}
+
+.kb-editable:focus-visible {
+  background: #1A2033;
+  box-shadow: 0 0 0 2px #4C8DFF;
+}
+
+/* 7. Checklist blocks */
+.kb-checklist-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  padding: 0.375rem 0.25rem;
+}
+
+.kb-checklist-item input[type="checkbox"] {
+  width: 20px;  /* larger than default so it's thumb-friendly */
+  height: 20px;
+  margin-top: 2px;
+  accent-color: #2FBF8F;
+}
+
+.kb-checklist-item[data-checked="true"] .kb-checklist-text {
+  color: #5B6478;
+  text-decoration: line-through;
+}
+
+/* 8. Code blocks */
+.kb-code-block {
+  font-family: var(--font-plex-mono, monospace);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  background: #0B0E14;
+  border: 1px solid #232A3B;
+  border-radius: 0.5rem;
+  padding: 0.875rem 1rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 9. Skeleton state while an article loads — reuses your pulse-soft rhythm */
+.kb-skeleton {
+  background: #1A2033;
+  border-radius: 0.5rem;
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+/* 10. Autosave indicator — quiet, doesn't steal focus or announce loudly */
+.kb-save-indicator {
+  font-size: 0.75rem;
+  color: #8891A6;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  transition: opacity 0.2s ease;
+}
+
+.kb-save-indicator[data-state="saving"]::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #F5A623;
+  animation: pulse-soft 1s ease-in-out infinite;
+}
+
+.kb-save-indicator[data-state="saved"]::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #2FBF8F;
+}
+
+/* 11. Reduced motion + small-viewport smoothing */
+@media (prefers-reduced-motion: reduce) {
+  .kb-block,
+  .kb-block.kb-block--removing,
+  .kb-add-menu,
+  .kb-skeleton {
+    animation: none !important;
+  }
+}
+
+/* Prevent iOS input zoom (which breaks the editing flow) on focus */
+@media (max-width: 768px) {
+  .kb-editable,
+  .kb-code-block textarea,
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}

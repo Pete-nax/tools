@@ -31,21 +31,8 @@ type DemoAccount = {
   password: string;
 };
 
-/**
- * Demo credential keyring — ONLY for non-production sandboxes.
- * Gated behind NEXT_PUBLIC_ENABLE_DEMO_LOGIN so real deployments never
- * ship working credentials (including an admin account) to the client.
- * Set NEXT_PUBLIC_ENABLE_DEMO_LOGIN=true in a local/staging .env only.
- */
-const DEMO_ACCOUNTS: DemoAccount[] = [
-  { id: "admin", role: "ADMIN", label: "Admin", email: "admin@mail.com", password: "ChangeMe123!" },
-  { id: "eng-1", role: "ENGINEER", label: "Engineer: brian.otieno", email: "brian.otieno@mail.com", password: "ChangeMe123!" },
-  { id: "eng-2", role: "ENGINEER", label: "Engineer: faith.mwangi", email: "faith.mwangi@mail.com", password: "ChangeMe123!" },
-  { id: "viewer", role: "VIEWER", label: "Viewer", email: "viewer@mail.com", password: "ChangeMe123!" },
-];
 
-const DEMO_LOGIN_ENABLED = process.env.NEXT_PUBLIC_ENABLE_DEMO_LOGIN === "true";
-const GLITCH_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
+
 
 function OrbIcon({ role }: { role: DemoAccount["role"] }) {
   if (role === "ADMIN") {
@@ -83,6 +70,18 @@ export default function LoginForm({ nextPath }: { nextPath: string }) {
   const [filling, setFilling] = useState(false);
   const [linePaths, setLinePaths] = useState<{ d: string; key: string }[]>([]);
   const [drawKey, setDrawKey] = useState(0);
+  const [activeRole, setActiveRole] = useState<string | null>(null);
+
+function quickLogin(account: typeof DEMO_ACCOUNTS[number]) {
+  setActiveRole(account.id);
+  glitchFill(setEmail, account.email);
+  glitchFill(setPassword, account.password, () => {
+    setTimeout(() => {
+      const form = document.getElementById("login-form") as HTMLFormElement;
+      form?.requestSubmit();
+    }, 150);
+  });
+}
 
   const sceneRef = useRef<HTMLDivElement>(null);
   const emailFieldRef = useRef<HTMLDivElement>(null);

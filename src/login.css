@@ -1,58 +1,69 @@
 /*
-      Animated Login Page
+  NOC_CORE — "Architectural Tech" Login
+  Midnight Cobalt theme: void background, glass monolith, chamfered geometry,
+  cyan accent, and a keyring of demo-role orbs with a handshake auth flow.
+*/
 
-/* 1. Ambient background — slow, subtle, never distracting */
+:root {
+  --bg-void: #070a11;
+  --glass-surface: rgba(18, 26, 47, 0.4);
+  --accent-cyan: #00e5ff;
+  --border-dim: rgba(255, 255, 255, 0.08);
+}
+
+/* 1. Void background — solid, no imagery, faint drift only */
 .login-bg {
   position: absolute;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
+  background: var(--bg-void);
 }
 
 .login-bg::before,
 .login-bg::after {
   content: "";
   position: absolute;
-  width: 55vw;
-  height: 55vw;
-  max-width: 640px;
-  max-height: 640px;
+  width: 45vw;
+  height: 45vw;
+  max-width: 520px;
+  max-height: 520px;
   border-radius: 50%;
-  filter: blur(90px);
-  opacity: 0.16;
+  filter: blur(110px);
+  opacity: 0.1;
   will-change: transform;
-  animation: drift 22s ease-in-out infinite alternate;
+  animation: drift 26s ease-in-out infinite alternate;
 }
 
 .login-bg::before {
-  background: radial-gradient(circle, #4C8DFF, transparent 70%);
+  background: radial-gradient(circle, var(--accent-cyan), transparent 70%);
   top: -15%;
   left: -10%;
 }
 
 .login-bg::after {
-  background: radial-gradient(circle, #2FBF8F, transparent 70%);
+  background: radial-gradient(circle, #0057ff, transparent 70%);
   bottom: -20%;
   right: -10%;
-  animation-delay: -11s;
+  animation-delay: -13s;
   animation-direction: alternate-reverse;
 }
 
 @keyframes drift {
   0%   { transform: translate3d(0, 0, 0) scale(1); }
-  100% { transform: translate3d(4%, 6%, 0) scale(1.08); }
+  100% { transform: translate3d(3%, 5%, 0) scale(1.06); }
 }
 
-/* 2. Panel entrance — one clean staggered reveal, not a bounce-fest */
+/* 2. The Monolith — glassmorphic chamfered login panel */
 .login-panel {
   animation: panel-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.login-eyebrow   { animation: field-in 0.45s ease-out both; animation-delay: 0.05s; }
-.login-heading   { animation: field-in 0.45s ease-out both; animation-delay: 0.1s; }
-.login-subtext   { animation: field-in 0.45s ease-out both; animation-delay: 0.15s; }
-.login-panel-card{ animation: field-in 0.45s ease-out both; animation-delay: 0.2s; }
-.login-footnote  { animation: field-in 0.45s ease-out both; animation-delay: 0.3s; }
+.login-eyebrow    { animation: field-in 0.45s ease-out both; animation-delay: 0.05s; }
+.login-heading    { animation: field-in 0.45s ease-out both; animation-delay: 0.1s; }
+.login-subtext    { animation: field-in 0.45s ease-out both; animation-delay: 0.15s; }
+.login-panel-card { animation: field-in 0.45s ease-out both; animation-delay: 0.2s; }
+.login-footnote   { animation: field-in 0.45s ease-out both; animation-delay: 0.3s; }
 
 @keyframes panel-in {
   from { opacity: 0; transform: translateY(10px); }
@@ -64,54 +75,81 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* 3. Live status pulse (pairs with your existing animate-pulse-soft dot) */
+.login-panel-card {
+  background: var(--glass-surface);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border: 1px solid var(--border-dim);
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+  border-radius: 0;
+}
+
+.login-heading {
+  font-family: var(--font-space-grotesk), sans-serif;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
+
+.login-mono {
+  font-family: var(--font-jetbrains-mono), monospace;
+}
+
+/* 3. Live status pulse */
 .login-status-dot {
-  box-shadow: 0 0 0 0 rgba(47, 191, 143, 0.6);
+  box-shadow: 0 0 0 0 rgba(0, 229, 255, 0.6);
   animation: status-ring 2.4s ease-out infinite;
 }
 
 @keyframes status-ring {
-  0%   { box-shadow: 0 0 0 0 rgba(47, 191, 143, 0.45); }
-  70%  { box-shadow: 0 0 0 8px rgba(47, 191, 143, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(47, 191, 143, 0); }
+  0%   { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0.45); }
+  70%  { box-shadow: 0 0 0 8px rgba(0, 229, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 229, 255, 0); }
 }
 
-/* 4. Inputs — animated focus underline instead of a jumpy border color */
-.login-field {
+/* 4. Inputs — sharp, chamfered, animated focus underline */
+.login-field-shell {
   position: relative;
+  border-radius: 0;
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
 }
 
-.login-field input {
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+.login-field-shell input {
+  transition: border-color 300ms ease-out, background-color 300ms ease-out, box-shadow 300ms ease-out;
 }
 
-.login-field::after {
+.login-field-shell::after {
   content: "";
   position: absolute;
   left: 0;
   right: 0;
   bottom: -1px;
   height: 2px;
-  background: #4C8DFF;
-  border-radius: 2px;
+  background: var(--accent-cyan);
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 0.25s ease;
 }
 
-.login-field:focus-within::after {
+.login-field-shell:focus-within::after {
   transform: scaleX(1);
 }
 
-/* 5. Submit button — hover lift + inline loading state, no layout shift */
+.login-field-shell.is-filling input {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 1px rgba(0, 229, 255, 0.35), 0 0 18px rgba(0, 229, 255, 0.15);
+}
+
+/* 5. Submit button — sharp chamfer, hover lift, inline loading state */
 .login-submit {
   position: relative;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+  border-radius: 0;
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  transition: all 300ms ease-out;
 }
 
 .login-submit:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px -8px rgba(76, 141, 255, 0.55);
+  box-shadow: 0 6px 24px -8px rgba(0, 229, 255, 0.5);
 }
 
 .login-submit:active:not(:disabled) {
@@ -134,9 +172,10 @@
   to { transform: rotate(360deg); }
 }
 
-/* 6. Error banner — a single short shake, not a jitter loop */
+/* 6. Error banner */
 .login-error {
   animation: shake 0.4s ease;
+  border-radius: 0;
 }
 
 @keyframes shake {
@@ -146,7 +185,98 @@
   40%, 60% { transform: translateX(4px); }
 }
 
-/* 7. Accessibility: honor OS motion preference and never trap focus feedback */
+/* 7. The Keyring — floating glass orb nodes for demo roles */
+.login-keyring {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.login-orb {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 1px solid var(--border-dim);
+  background: var(--glass-surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 300ms ease-out;
+}
+
+.login-orb:hover,
+.login-orb:focus-visible {
+  transform: scale(1.2);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 24px rgba(0, 229, 255, 0.55);
+}
+
+.login-orb.is-active {
+  transform: scale(1.2);
+  border-color: var(--accent-cyan);
+  background: var(--accent-cyan);
+  box-shadow: 0 0 28px rgba(0, 229, 255, 0.75);
+}
+
+.login-orb-icon {
+  color: var(--accent-cyan);
+  transition: color 300ms ease-out;
+}
+
+.login-orb.is-active .login-orb-icon {
+  color: #041016;
+}
+
+.login-orb-tooltip {
+  position: absolute;
+  right: calc(100% + 14px);
+  top: 50%;
+  transform: translateY(-50%) translateX(4px);
+  white-space: nowrap;
+  background: #04070d;
+  border: 1px solid var(--border-dim);
+  color: var(--accent-cyan);
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 12px;
+  padding: 6px 12px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 300ms ease-out, transform 300ms ease-out;
+  clip-path: polygon(5px 0, 100% 0, 100% 100%, 5px 100%, 0 50%);
+}
+
+.login-orb:hover .login-orb-tooltip,
+.login-orb:focus-visible .login-orb-tooltip,
+.login-orb.is-active .login-orb-tooltip {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+/* 8. Handshake — liquid SVG line drawn from the selected orb to the fields */
+.login-handshake-line {
+  fill: none;
+  stroke: var(--accent-cyan);
+  stroke-width: 1.5;
+  filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.8));
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
+  opacity: 0;
+}
+
+.login-handshake-line.is-drawing {
+  animation: handshake-draw 0.7s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+@keyframes handshake-draw {
+  0%   { opacity: 1; stroke-dashoffset: 400; }
+  100% { opacity: 1; stroke-dashoffset: 0; }
+}
+
+/* 9. Accessibility */
 @media (prefers-reduced-motion: reduce) {
   .login-bg::before,
   .login-bg::after,
@@ -157,16 +287,18 @@
   .login-panel-card,
   .login-footnote,
   .login-status-dot,
-  .login-error {
+  .login-error,
+  .login-orb,
+  .login-handshake-line {
     animation: none !important;
   }
-  .login-submit:hover:not(:disabled) {
+  .login-submit:hover:not(:disabled),
+  .login-orb:hover {
     transform: none;
   }
 }
 
-/* Keyboard users always get a visible ring even inside the animated card */
 .login-panel :focus-visible {
-  outline: 2px solid #4C8DFF;
+  outline: 2px solid var(--accent-cyan);
   outline-offset: 2px;
 }

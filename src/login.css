@@ -317,3 +317,23 @@
   color: #4C8DFF;
   box-shadow: 0 0 16px rgba(76, 141, 255, 0.5);
 }
+.login-demo-chip {
+  padding: 3px 10px;
+  border: 1px solid var(--border-dim);
+  background: var(--glass-surface);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: var(--accent-cyan);
+  clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+  transition: all 300ms ease-out;
+}
+
+.login-demo-chip:hover {
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.35);
+}
+
+.login-demo-chip.is-password {
+  color: var(--ink-muted, #8891A6);
+  letter-spacing: 0.05em;
+}

@@ -1,25 +1,5 @@
 "use client";
 
-// --- Demo role quick-login (gated so it never ships live creds by accident) ---
-const DEMO_ACCOUNTS = [
-  { id: "admin", label: "Admin", email: "admin@mail.com", password: "ChangeMe123!" },
-  { id: "eng-1", label: "Engineer: brian.otieno", email: "brian.otieno@mail.com", password: "ChangeMe123!" },
-  { id: "eng-2", label: "Engineer: faith.mwangi", email: "faith.mwangi@mail.com", password: "ChangeMe123!" },
-  { id: "viewer", label: "Viewer", email: "viewer@mail.com", password: "ChangeMe123!" },
-];
-const DEMO_LOGIN_ENABLED = process.env.NEXT_PUBLIC_ENABLE_DEMO_LOGIN === "true";
-const GLITCH_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%";
-
-function glitchFill(setter: (v: string) => void, finalValue: string, onDone?: () => void) {
-  for (let i = 0; i <= finalValue.length; i++) {
-    setTimeout(() => {
-      const revealed = finalValue.slice(0, i);
-      const noise = i < finalValue.length ? GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)] : "";
-      setter(revealed + noise);
-      if (i === finalValue.length) setTimeout(() => { setter(finalValue); onDone?.(); }, 15);
-    }, i * 15);
-  }
-}
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -31,8 +11,21 @@ type DemoAccount = {
   password: string;
 };
 
+/**
+ * Demo credential keyring — ONLY for non-production sandboxes.
+ * Gated behind NEXT_PUBLIC_ENABLE_DEMO_LOGIN so real deployments never
+ * ship working credentials (including an admin account) to the client.
+ * Set NEXT_PUBLIC_ENABLE_DEMO_LOGIN=true in a local/staging .env only.
+ */
+const DEMO_ACCOUNTS: DemoAccount[] = [
+  { id: "admin", role: "ADMIN", label: "Admin", email: "admin@mail.com", password: "ChangeMe123!" },
+  { id: "eng-1", role: "ENGINEER", label: "Engineer: brian.otieno", email: "brian.otieno@mail.com", password: "ChangeMe123!" },
+  { id: "eng-2", role: "ENGINEER", label: "Engineer: faith.mwangi", email: "faith.mwangi@mail.com", password: "ChangeMe123!" },
+  { id: "viewer", role: "VIEWER", label: "Viewer", email: "viewer@mail.com", password: "ChangeMe123!" },
+];
 
-
+const DEMO_LOGIN_ENABLED = process.env.NEXT_PUBLIC_ENABLE_DEMO_LOGIN === "true";
+const GLITCH_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
 
 function OrbIcon({ role }: { role: DemoAccount["role"] }) {
   if (role === "ADMIN") {
@@ -70,20 +63,9 @@ export default function LoginForm({ nextPath }: { nextPath: string }) {
   const [filling, setFilling] = useState(false);
   const [linePaths, setLinePaths] = useState<{ d: string; key: string }[]>([]);
   const [drawKey, setDrawKey] = useState(0);
-  const [activeRole, setActiveRole] = useState<string | null>(null);
-
-function quickLogin(account: typeof DEMO_ACCOUNTS[number]) {
-  setActiveRole(account.id);
-  glitchFill(setEmail, account.email);
-  glitchFill(setPassword, account.password, () => {
-    setTimeout(() => {
-      const form = document.getElementById("login-form") as HTMLFormElement;
-      form?.requestSubmit();
-    }, 150);
-  });
-}
 
   const sceneRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   const emailFieldRef = useRef<HTMLDivElement>(null);
   const passwordFieldRef = useRef<HTMLDivElement>(null);
   const orbRefs = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -113,6 +95,265 @@ function quickLogin(account: typeof DEMO_ACCOUNTS[number]) {
   }
 
   function runHandshake(account: DemoAccount) {
+    clearFillTimers();
+    setError(null);
+    setActiveOrbId(account.id);
+
+    const orbEl = orbRefs.current[account.id];
+    const sceneEl = sceneRef.current;
+    if (orbEl && sceneEl && emailFieldRef.current && passwordFieldRef.current) {
+      const sceneBox = sceneEl.getBoundingClientRect();
+      const orbBox = orbEl.getBoundingClientRect();
+      const origin = {
+        x: orbBox.left + orbBox.width / 2 - sceneBox.left,
+        y: orbBox.top + orbBox.height / 2 - sceneBox.top,
+      };
+
+      const targets = [emailFieldRef.current, passwordFieldRef.current].map((el) => {
+        const box = el.getBoundingClientRect();
+        return {
+          x: box.right - sceneBox.left,
+          y: box.top + box.height / 2 - sceneBox.top,
+        };
+      });
+
+      const paths = targets.map((t, i) => {
+        const midX = (origin.x + t.x) / 2;
+        return { d: `M ${origin.x} ${origin.y} C ${midX} ${origin.y}, ${midX} ${t.y}, ${t.x} ${t.y}`, key: `${account.id}-${i}` };
+      });
+      setLinePaths(paths);
+      setDrawKey((k) => k + 1);
+    }
+
+    setFilling(true);
+    glitchType("email", account.email);
+    glitchType("password", account.password);
+    const doneTimer = window.setTimeout(() => {
+      setFilling(false);
+      formRef.current?.requestSubmit();
+    }, Math.max(account.email.length, account.password.length) * 15 + 200);
+    fillTimers.current.push(doneTimer);
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Sign in failed");
+        setLoading(false);
+        return;
+      }
+      router.push(nextPath);
+      router.refresh();
+    } catch {
+      setError("Could not reach the server. Check your connection and try again.");
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div ref={sceneRef} className="relative flex items-center gap-10">
+      <svg aria-hidden className="pointer-events-none absolute inset-0 h-full w-full overflow-visible">
+        {linePaths.map((p) => (
+          <path key={`${p.key}-${drawKey}`} d={p.d} className="login-handshake-line is-drawing" />
+        ))}
+      </svg>
+
+      <form ref={formRef} onSubmit={handleSubmit} className="space-y-5 w-full" noValidate>
+        <div>
+          <label htmlFor="email" className="login-mono block text-xs uppercase tracking-[0.15em] text-ink-muted mb-1.5">
+            Identity
+          </label>
+          <div ref={emailFieldRef} className={`login-field-shell ${filling ? "is-filling" : ""}`}>
+            <input
+              id="email"
+              type="email"
+              required
+              autoComplete="username"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="login-mono w-full border border-base-border bg-base-bg px-3.5 py-2.5 text-ink placeholder:text-ink-faint focus:border-accent-cyan focus:outline-none"
+              placeholder="your@mail.com"
+            />
+          </div>
+        </div>
+        <div>
+          <label htmlFor="password" className="login-mono block text-xs uppercase tracking-[0.15em] text-ink-muted mb-1.5">
+            Token
+          </label>
+          <div ref={passwordFieldRef} className={`login-field-shell ${filling ? "is-filling" : ""}`}>
+            <input
+              id="password"
+              type="password"
+              required
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="login-mono w-full border border-base-border bg-base-bg px-3.5 py-2.5 text-ink placeholder:text-ink-faint focus:border-accent-cyan focus:outline-none"
+              placeholder="••••••••••"
+            />
+          </div>
+        </div>
+
+        {error && (
+          <p role="alert" className="login-error login-mono text-sm text-status-down border border-status-down/30 bg-status-down/10 px-3 py-2">
+            {error}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="login-submit login-mono w-full bg-accent-cyan text-[#041016] font-semibold uppercase tracking-wide py-2.5 hover:brightness-110 disabled:opacity-60"
+        >
+          {loading && <span className="spinner" aria-hidden />}
+          {loading ? "Initializing..." : "Initialize Session →"}
+        </button>
+      </form>
+
+      {DEMO_LOGIN_ENABLED && (
+        <div className="login-keyring" role="group" aria-label="Demo role credentials">
+          {DEMO_ACCOUNTS.map((account) => (
+            <button
+              key={account.id}
+              ref={(el) => {
+                orbRefs.current[account.id] = el;
+              }}
+              type="button"
+              onClick={() => runHandshake(account)}
+              className={`login-orb ${activeOrbId === account.id ? "is-active" : ""}`}
+              aria-label={`Fill credentials for ${account.label}`}
+            >
+              <OrbIcon role={account.role} />
+              <span className="login-orb-tooltip">{account.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+        }    glitchType("password", account.password);
+    const doneTimer = window.setTimeout(() => {
+      setFilling(false);
+      formRef.current?.requestSubmit();
+    }, Math.max(account.email.length, account.password.length) * 15 + 200);
+    fillTimers.current.push(doneTimer);
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Sign in failed");
+        setLoading(false);
+        return;
+      }
+      router.push(nextPath);
+      router.refresh();
+    } catch {
+      setError("Could not reach the server. Check your connection and try again.");
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div ref={sceneRef} className="relative flex items-center gap-10">
+      <svg aria-hidden className="pointer-events-none absolute inset-0 h-full w-full overflow-visible">
+        {linePaths.map((p) => (
+          <path key={`${p.key}-${drawKey}`} d={p.d} className="login-handshake-line is-drawing" />
+        ))}
+      </svg>
+
+      <form ref={formRef} onSubmit={handleSubmit} className="space-y-5 w-full" noValidate>
+        <div>
+          <label htmlFor="email" className="login-mono block text-xs uppercase tracking-[0.15em] text-ink-muted mb-1.5">
+            Identity
+          </label>
+          <div ref={emailFieldRef} className={`login-field-shell ${filling ? "is-filling" : ""}`}>
+            <input
+              id="email"
+              type="email"
+              required
+              autoComplete="username"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="login-mono w-full border border-base-border bg-base-bg px-3.5 py-2.5 text-ink placeholder:text-ink-faint focus:border-accent-cyan focus:outline-none"
+              placeholder="your@mail.com"
+            />
+          </div>
+        </div>
+        <div>
+          <label htmlFor="password" className="login-mono block text-xs uppercase tracking-[0.15em] text-ink-muted mb-1.5">
+            Token
+          </label>
+          <div ref={passwordFieldRef} className={`login-field-shell ${filling ? "is-filling" : ""}`}>
+            <input
+              id="password"
+              type="password"
+              required
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="login-mono w-full border border-base-border bg-base-bg px-3.5 py-2.5 text-ink placeholder:text-ink-faint focus:border-accent-cyan focus:outline-none"
+              placeholder="••••••••••"
+            />
+          </div>
+        </div>
+
+        {error && (
+          <p role="alert" className="login-error login-mono text-sm text-status-down border border-status-down/30 bg-status-down/10 px-3 py-2">
+            {error}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="login-submit login-mono w-full bg-accent-cyan text-[#041016] font-semibold uppercase tracking-wide py-2.5 hover:brightness-110 disabled:opacity-60"
+        >
+          {loading && <span className="spinner" aria-hidden />}
+          {loading ? "Initializing..." : "Initialize Session →"}
+        </button>
+      </form>
+
+      {DEMO_LOGIN_ENABLED && (
+        <div className="login-keyring" role="group" aria-label="Demo role credentials">
+          {DEMO_ACCOUNTS.map((account) => (
+            <button
+              key={account.id}
+              ref={(el) => {
+                orbRefs.current[account.id] = el;
+              }}
+              type="button"
+              onClick={() => runHandshake(account)}
+              className={`login-orb ${activeOrbId === account.id ? "is-active" : ""}`}
+              aria-label={`Fill credentials for ${account.label}`}
+            >
+              <OrbIcon role={account.role} />
+              <span className="login-orb-tooltip">{account.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}  function runHandshake(account: DemoAccount) {
     clearFillTimers();
     setError(null);
     setActiveOrbId(account.id);

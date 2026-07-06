@@ -174,15 +174,25 @@ function quickLogin(account: typeof DEMO_ACCOUNTS[number]) {
     }
   }
 
-  return (
-    <div ref={sceneRef} className="relative flex items-center gap-10">
-      <svg aria-hidden className="pointer-events-none absolute inset-0 h-full w-full overflow-visible">
-        {linePaths.map((p) => (
-          <path key={`${p.key}-${drawKey}`} d={p.d} className="login-handshake-line is-drawing" />
+return (
+  <>
+    {DEMO_LOGIN_ENABLED && (
+      <div className="flex justify-center gap-3 mb-5">
+        {DEMO_ACCOUNTS.map((acc) => (
+          <button
+            key={acc.id}
+            type="button"
+            onClick={() => quickLogin(acc)}
+            title={acc.label}
+            className={`demo-role-btn ${activeRole === acc.id ? "is-active" : ""}`}
+          >
+            {acc.label.split(":")[0][0]}
+          </button>
         ))}
-      </svg>
+      </div>
+    )}
 
-      <form onSubmit={handleSubmit} className="space-y-5 w-full" noValidate>
+    <form id="login-form" onSubmit={handleSubmit} className="space-y-5" noValidate>
         <div>
           <label htmlFor="email" className="login-mono block text-xs uppercase tracking-[0.15em] text-ink-muted mb-1.5">
             Identity

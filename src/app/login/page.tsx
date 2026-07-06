@@ -30,7 +30,16 @@ export default async function LoginPage({
         <div className="login-panel-card px-7 py-8">
           <LoginForm nextPath={nextPath} />
         </div>
-
+{process.env.NEXT_PUBLIC_ENABLE_DEMO_LOGIN === "true" && (
+  <div className="login-demo-legend login-mono mt-4 flex flex-wrap items-center justify-center gap-2 text-xs text-ink-muted">
+    <span className="login-demo-chip">Admin</span>
+    <span className="login-demo-chip">Engineer (Brian)</span>
+    <span className="login-demo-chip">Engineer (Faith)</span>
+    <span className="login-demo-chip">Viewer</span>
+    <span className="text-ink-faint">·</span>
+    <span className="login-demo-chip is-password">ChangeMe123!</span>
+  </div>
+)}
         <p className="login-footnote login-mono text-center text-xs text-ink-faint mt-6">
           Tickets · Knowledge base · Device diagnostics
         </p>

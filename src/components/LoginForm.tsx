@@ -1,5 +1,25 @@
 "use client";
 
+// --- Demo role quick-login (gated so it never ships live creds by accident) ---
+const DEMO_ACCOUNTS = [
+  { id: "admin", label: "Admin", email: "admin@mail.com", password: "ChangeMe123!" },
+  { id: "eng-1", label: "Engineer: brian.otieno", email: "brian.otieno@mail.com", password: "ChangeMe123!" },
+  { id: "eng-2", label: "Engineer: faith.mwangi", email: "faith.mwangi@mail.com", password: "ChangeMe123!" },
+  { id: "viewer", label: "Viewer", email: "viewer@mail.com", password: "ChangeMe123!" },
+];
+const DEMO_LOGIN_ENABLED = process.env.NEXT_PUBLIC_ENABLE_DEMO_LOGIN === "true";
+const GLITCH_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%";
+
+function glitchFill(setter: (v: string) => void, finalValue: string, onDone?: () => void) {
+  for (let i = 0; i <= finalValue.length; i++) {
+    setTimeout(() => {
+      const revealed = finalValue.slice(0, i);
+      const noise = i < finalValue.length ? GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)] : "";
+      setter(revealed + noise);
+      if (i === finalValue.length) setTimeout(() => { setter(finalValue); onDone?.(); }, 15);
+    }, i * 15);
+  }
+}
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 

@@ -1,7 +1,7 @@
 name: Enterprise AI Auto-Refactor
 
 on:
-  workflow_dispatch:
+  workflow_dispatc h:
 
 jobs:
   refactor:

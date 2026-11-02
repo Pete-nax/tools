@@ -1,0 +1,35 @@
+name: Enterprise AI Auto-Refactor & Secure Commit
+
+on:
+  workflow_dispatch: # Allows manual trigger from the GitHub Actions tab
+
+jobs:
+  refactor-codebase:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required to push commits back to the repo
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: pip install google-genai
+
+      - name: Execute Multi-Disciplinary AI Refactoring
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python scripts/ai_refactor.py
+
+      - name: Commit and Push Upgraded Code
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git diff --quiet && git diff --staged --quiet || (git commit -m "refactor(enterprise): automated security hardening, network optimization, and README update" && git push)
+          
